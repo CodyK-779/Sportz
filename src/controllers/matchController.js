@@ -44,6 +44,10 @@ export const matchController = {
         status: getMatchStatus(startTime, endTime)
       }).returning();
 
+      if (res.app.locals.broadcastMatchCreated) {
+        res.app.locals.broadcastMatchCreated(event);
+      }
+
       res.status(201).json({ data: event });
     } catch (error) {
       console.error("Failed to create match:", error);
