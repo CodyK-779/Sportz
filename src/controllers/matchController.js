@@ -11,7 +11,7 @@ export const matchController = {
     const parsed = listMatchesQuerySchema.safeParse(req.query);
 
     if (!parsed.success) {
-      return res.status(400).json({ error: "Invalid query.", details: JSON.stringify(parsed.error) });
+      return res.status(400).json({ error: "Invalid query.", details: parsed.error.issues });
     }
 
     const limit = Math.min(parsed.data.limit ?? 50, MAX_LIMIT);
@@ -27,11 +27,12 @@ export const matchController = {
 
   createMatches: async (req, res) => {
     const parsed = createMatchSchema.safeParse(req.body);
-    const { data: { startTime, endTime, homeScore, awayScore } } = parsed;
 
     if (!parsed.success) {
-      return res.status(400).json({ error: "Invalid payload.", details: JSON.stringify(parsed.error) });
+      return res.status(400).json({ error: "Invalid payload.", details: parsed.error.issues });
     }
+
+    const { startTime, endTime, homeScore, awayScore } = parsed.data;
 
     try {
       const [event] = await db.insert(matches).values({
@@ -45,7 +46,8 @@ export const matchController = {
 
       res.status(201).json({ data: event });
     } catch (error) {
-      return res.status(500).json({ error: "Failed to create match.", details: JSON.stringify(error) });
+      console.error("Failed to create match:", error);
+      return res.status(500).json({ error: "Failed to create match." });
     }
   }
 }
