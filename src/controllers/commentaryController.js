@@ -71,7 +71,11 @@ export const commentaryController = {
         .values({ ...parsedBody.data, matchId: parsedParams.data.id })
         .returning();
 
-      return res.status(201).json({ data: event });
+      if (res.app.locals.broadcastCommentary) {
+        res.app.locals.broadcastCommentary(event.matchId, event)
+      }
+
+      res.status(201).json({ data: event });
     } catch (error) {
       console.error("Failed to create commentary:", error);
       return res.status(500).json({ error: "Failed to create commentary." });
